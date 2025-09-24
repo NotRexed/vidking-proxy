@@ -1,25 +1,18 @@
-// server.js
-const express = require("express");
-const cors = require("cors");
-const path = require("path");
+import express from "express";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Allow cross-origin requests from your frontend
-app.use(cors());
+// Middleware so we can parse JSON requests
 app.use(express.json());
 
-// Serve your static frontend files
-app.use(express.static(path.join(__dirname, "public"))); 
-// Put your HTML, script.js, style.css, etc inside a "public" folder
-
-// API endpoint to build embed URLs
+// === ADD THIS PART ===
+// API endpoint that builds the embed URL
 app.post("/api/build-url", (req, res) => {
   const { type, showId, season, episode } = req.body;
 
   if (!showId) {
-    return res.status(400).json({ error: "Missing showId" });
+    return res.json({ error: "Missing showId" });
   }
 
   let url = "";
@@ -27,17 +20,18 @@ app.post("/api/build-url", (req, res) => {
     url = `https://www.vidking.net/embed/movie/${showId}`;
   } else if (type === "tv") {
     if (!season || !episode) {
-      return res.status(400).json({ error: "Missing season or episode" });
+      return res.json({ error: "Missing season or episode for TV show" });
     }
     url = `https://www.vidking.net/embed/tv/${showId}/${season}/${episode}`;
   } else {
-    return res.status(400).json({ error: "Invalid type" });
+    return res.json({ error: "Invalid type" });
   }
 
   res.json({ url });
 });
+// === END OF NEW PART ===
 
 // Start server
 app.listen(PORT, () => {
-  console.log(`✅ Server running on http://localhost:${PORT}`);
+  console.log(`Server running at http://localhost:${PORT}`);
 });
